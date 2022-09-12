@@ -1,9 +1,21 @@
 <template>
   <div data-waline>
     <CommentBox v-if="!reply" @submit="onSubmit" />
-    <div class="wl-count">
-      <span v-if="count" class="wl-num" v-text="count" />
-      {{ i18n.comment }}
+    <div class="wl-meta-head">
+      <div class="wl-count">
+        <span v-if="count" class="wl-num" v-text="count" />
+        {{ i18n.comment }}
+      </div>
+      <ul class="wl-sort">
+        <li
+          v-for="item in sortByItems"
+          :key="item.key"
+          :class="[item.key === sortBy ? 'active' : '']"
+          @click="onSortByChange(item.key)"
+        >
+          {{ i18n[item.name] }}
+        </li>
+      </ul>
     </div>
 
     <div class="wl-cards">
@@ -13,7 +25,9 @@
         :root-id="comment.objectId"
         :comment="comment"
         :reply="reply"
+        :edit="edit"
         @reply="onReply"
+        @edit="onEdit"
         @submit="onSubmit"
         @status="onStatusChange"
         @delete="onDelete"
@@ -115,6 +129,24 @@ const props = [
   'imageUploader',
   'search',
   'copyright',
+];
+
+type SortKeyItems = 'insertedAt_desc' | 'insertedAt_asc' | 'like_desc';
+type SortNameItems = 'latest' | 'oldest' | 'hottest';
+type SortByItems = { key: SortKeyItems; name: SortNameItems }[];
+const sortByItems: SortByItems = [
+  {
+    key: 'insertedAt_desc',
+    name: 'latest',
+  },
+  {
+    key: 'insertedAt_asc',
+    name: 'oldest',
+  },
+  {
+    key: 'like_desc',
+    name: 'hottest',
+  },
 ];
 
 const propsWithValidate = {
@@ -229,9 +261,11 @@ export default defineComponent({
     const count = ref(0);
     const page = ref(1);
     const totalPages = ref(0);
+    const sortBy = ref<SortKeyItems>(sortByItems[0].key);
 
     const data = ref<WalineComment[]>([]);
     const reply = ref<WalineComment | null>(null);
+    const edit = ref<WalineComment | null>(null);
 
     const darkmodeStyle = computed(() => getDarkStyle(config.value.dark));
 
@@ -253,6 +287,7 @@ export default defineComponent({
         lang: config.value.lang,
         path,
         pageSize,
+        sortBy: sortBy.value,
         page: pageNumber,
         signal: controller.signal,
         token: userInfo.value?.token,
@@ -282,12 +317,27 @@ export default defineComponent({
       fetchComment(1);
     };
 
+    const onSortByChange = (item: SortKeyItems): void => {
+      if (sortBy.value === item) {
+        return;
+      }
+      sortBy.value = item;
+      refresh();
+    };
+
     const onReply = (comment: WalineComment | null): void => {
       reply.value = comment;
     };
 
+    const onEdit = (comment: WalineComment | null): void => {
+      edit.value = comment;
+    };
+
     const onSubmit = (comment: WalineComment): void => {
-      if (comment.rid) {
+      if (edit.value) {
+        edit.value.comment = comment.comment;
+        edit.value.orig = comment.orig;
+      } else if (comment.rid) {
         const repliedComment = data.value.find(
           ({ objectId }) => objectId === comment.rid
         );
@@ -412,17 +462,22 @@ export default defineComponent({
       count,
       page,
       totalPages,
+      sortBy,
+      sortByItems,
       data,
       reply,
+      edit,
 
       loadMore,
       refresh,
+      onSortByChange,
       onReply,
       onSubmit,
       onStatusChange,
       onDelete,
       onSticky,
       onLike,
+      onEdit,
 
       version: VERSION,
     };
