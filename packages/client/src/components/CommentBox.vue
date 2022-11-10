@@ -36,7 +36,7 @@
       >
         <div v-for="kind in config.meta" :key="kind" class="wl-header-item">
           <label
-            :for="kind"
+            :for="`wl-${kind}`"
             v-text="
               locale[kind] +
               (config.requiredMeta.includes(kind) || !config.requiredMeta.length
@@ -263,6 +263,7 @@
 
 <script lang="ts">
 import { useDebounceFn } from '@vueuse/core';
+import { useReCaptcha } from '../composables';
 import autosize from 'autosize';
 import {
   computed,
@@ -286,6 +287,7 @@ import {
   GifIcon,
 } from './Icons';
 import ImageWall from './ImageWall.vue';
+import { addComment, login } from '../api';
 import { useEditor, useUserMeta, useUserInfo } from '../composables';
 import {
   getEmojis,
@@ -293,7 +295,6 @@ import {
   getWordNumber,
   parseEmoji,
   parseMarkdown,
-  postComment,
 } from '../utils';
 
 import type { ComputedRef, DeepReadonly } from 'vue';
@@ -342,9 +343,7 @@ export default defineComponent({
   emits: ['submit', 'cancel-reply', 'cancel-edit'],
 
   setup(props, { emit }) {
-    const config = inject<ComputedRef<WalineConfig>>(
-      'config'
-    ) as ComputedRef<WalineConfig>;
+    const config = inject<ComputedRef<WalineConfig>>('config')!;
 
     const editor = useEditor();
     const userMeta = useUserMeta();
@@ -369,7 +368,7 @@ export default defineComponent({
 
     const searchResults = reactive({
       loading: true,
-      list: [] as WalineSearchResult[],
+      list: [] as WalineSearchResult,
     });
 
     const wordLimit = ref(0);
@@ -386,7 +385,7 @@ export default defineComponent({
     const canUploadImage = computed(() => config.value.imageUploader !== false);
 
     const insert = (content: string): void => {
-      const textArea = editorRef.value as HTMLTextAreaElement;
+      const textArea = editorRef.value!;
       const startPosition = textArea.selectionStart;
       const endPosition = textArea.selectionEnd || 0;
       const scrollTop = textArea.scrollTop;
@@ -447,7 +446,7 @@ export default defineComponent({
     };
 
     const onChange = (): void => {
-      const inputElement = imageUploadRef.value as HTMLInputElement;
+      const inputElement = imageUploadRef.value!;
 
       if (inputElement.files && canUploadImage.value)
         uploadImage(inputElement.files[0]).then(() => {
@@ -456,8 +455,15 @@ export default defineComponent({
         });
     };
 
-    const submitComment = (): void => {
+    const submitComment = async (): Promise<void> => {
       const { serverURL, lang, login, wordLimit, requiredMeta } = config.value;
+
+      let token = '';
+
+      if (config.value.recaptchaV3Key)
+        token = await useReCaptcha(config.value.recaptchaV3Key).execute(
+          'social'
+        );
 
       const comment: WalineCommentData = {
         comment: content.value,
@@ -466,6 +472,7 @@ export default defineComponent({
         link: userMeta.value.link,
         ua: navigator.userAgent,
         url: config.value.path,
+        recaptchaV3: token,
       };
 
       if (userInfo.value?.token) {
@@ -525,7 +532,7 @@ export default defineComponent({
 
       isSubmitting.value = true;
 
-      postComment({
+      addComment({
         serverURL,
         lang,
         token: userInfo.value?.token,
@@ -556,36 +563,16 @@ export default defineComponent({
       event.preventDefault();
       const { lang, serverURL } = config.value;
 
-      const width = 450;
-      const height = 450;
-      const left = (window.innerWidth - width) / 2;
-      const top = (window.innerHeight - height) / 2;
-
-      const handler = window.open(
-        `${serverURL}/ui/login?lng=${encodeURIComponent(lang)}`,
-        '_blank',
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no`
-      );
-
-      handler?.postMessage({ type: 'TOKEN', data: null }, '*');
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const receiver = ({ data }: any): void => {
-        if (!data || data.type !== 'userInfo') return;
-
-        if (data.data.token) {
-          handler?.close();
-          userInfo.value = data.data;
-          (data.data.remember ? localStorage : sessionStorage).setItem(
-            'WALINE_USER',
-            JSON.stringify(data.data)
-          );
-
-          window.removeEventListener('message', receiver);
-        }
-      };
-
-      window.addEventListener('message', receiver);
+      login({
+        serverURL,
+        lang,
+      }).then((data) => {
+        userInfo.value = data;
+        (data.remember ? localStorage : sessionStorage).setItem(
+          'WALINE_USER',
+          JSON.stringify(data)
+        );
+      });
     };
 
     const onLogout = (): void => {
@@ -603,8 +590,12 @@ export default defineComponent({
       const height = 800;
       const left = (window.innerWidth - width) / 2;
       const top = (window.innerHeight - height) / 2;
+      const query = new URLSearchParams({
+        lng: lang,
+        token: userInfo.value!.token,
+      });
       const handler = window.open(
-        `${serverURL}/ui/profile?lng=${encodeURIComponent(lang)}`,
+        `${serverURL}/ui/profile?${query.toString()}`,
         '_blank',
         `width=${width},height=${height},left=${left},top=${top},scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no`
       );
@@ -614,14 +605,14 @@ export default defineComponent({
 
     const popupHandler = (event: MouseEvent): void => {
       if (
-        !(emojiButtonRef.value as HTMLElement).contains(event.target as Node) &&
-        !(emojiPopupRef.value as HTMLElement).contains(event.target as Node)
+        !emojiButtonRef.value!.contains(event.target as Node) &&
+        !emojiPopupRef.value!.contains(event.target as Node)
       )
         showEmoji.value = false;
 
       if (
-        !(gifButtonRef.value as HTMLElement).contains(event.target as Node) &&
-        !(gifPopupRef.value as HTMLElement).contains(event.target as Node)
+        !gifButtonRef.value!.contains(event.target as Node) &&
+        !gifPopupRef.value!.contains(event.target as Node)
       )
         showGif.value = false;
     };
@@ -637,11 +628,12 @@ export default defineComponent({
 
       searchResults.loading = true;
 
-      searchResults.list.push(
-        ...(searchOptions.more
+      searchResults.list = [
+        ...searchResults.list,
+        ...(searchOptions.more && searchResults.list.length
           ? await searchOptions.more(keyword, searchResults.list.length)
-          : await searchOptions.search(keyword))
-      );
+          : await searchOptions.search(keyword)),
+      ];
 
       searchResults.loading = false;
 

@@ -1,6 +1,6 @@
 {
   "name": "@waline/vercel",
-  "version": "1.21.0",
+  "version": "1.25.0",
   "description": "vercel server for waline comment system",
   "keywords": [
     "waline",
@@ -16,14 +16,14 @@
   "author": "lizheming <i@imnerd.org>",
   "dependencies": {
     "@cloudbase/node-sdk": "2.9.1",
-    "@koa/cors": "3.4.1",
+    "@koa/cors": "4.0.0",
     "akismet": "2.0.7",
     "deta": "1.1.0",
     "dompurify": "2.4.0",
     "dy-node-ip2region": "1.0.1",
     "fast-csv": "4.3.6",
     "form-data": "4.0.0",
-    "jsdom": "20.0.0",
+    "jsdom": "20.0.1",
     "jsonwebtoken": "8.5.1",
     "katex": "0.16.2",
     "leancloud-storage": "4.13.2",
@@ -33,7 +33,7 @@
     "markdown-it-sup": "1.0.0",
     "mathjax-full": "3.2.2",
     "node-fetch": "2.6.7",
-    "nodemailer": "6.7.8",
+    "nodemailer": "6.8.0",
     "nunjucks": "3.2.3",
     "phpass": "0.1.1",
     "prismjs": "1.29.0",
@@ -47,7 +47,7 @@
     "think-mongo": "2.2.1",
     "think-router-rest": "1.0.5",
     "thinkjs": "3.2.14",
-    "ua-parser-js": "1.0.2"
+    "ua-parser-js": "1.0.32"
   },
   "engines": {
     "node": ">=14"

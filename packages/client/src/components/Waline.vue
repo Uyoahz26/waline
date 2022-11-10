@@ -1,5 +1,6 @@
 <template>
   <div data-waline>
+    <Reaction />
     <CommentBox v-if="!reply" @submit="onSubmit" />
     <div class="wl-meta-head">
       <div class="wl-count">
@@ -81,19 +82,14 @@
 <script lang="ts">
 import { useStyleTag } from '@vueuse/core';
 import { computed, defineComponent, onMounted, provide, ref, watch } from 'vue';
+import Reaction from './ArticleReaction.vue';
 import CommentBox from './CommentBox.vue';
 import CommentCard from './CommentCard.vue';
 import { LoadingIcon } from './Icons';
 import { useUserInfo, useLikeStorage } from '../composables';
 import { defaultLocales } from '../config';
-import {
-  deleteComment,
-  fetchCommentList,
-  likeComment,
-  getConfig,
-  getDarkStyle,
-  updateComment,
-} from '../utils';
+import { deleteComment, getComment, likeComment, updateComment } from '../api';
+import { getConfig, getDarkStyle } from '../utils';
 
 import type { PropType } from 'vue';
 import type {
@@ -129,6 +125,8 @@ const props = [
   'imageUploader',
   'search',
   'copyright',
+  'recaptchaV3Key',
+  'reaction',
 ];
 
 type SortKeyItems = 'insertedAt_desc' | 'insertedAt_asc' | 'like_desc';
@@ -237,12 +235,22 @@ const propsWithValidate = {
   },
 
   copyright: { type: Boolean, default: true },
+
+  recaptchaV3Key: {
+    type: String,
+    default: '',
+  },
+
+  reaction: {
+    type: [Array, Boolean] as PropType<string[] | false>,
+  },
 };
 
 export default defineComponent({
   name: 'WalineRoot',
 
   components: {
+    Reaction,
     CommentBox,
     CommentCard,
     LoadingIcon,
@@ -274,7 +282,7 @@ export default defineComponent({
     // eslint-disable-next-line vue/no-setup-props-destructure
     let abort: () => void;
 
-    const fetchComment = (pageNumber: number): void => {
+    const getCommentData = (pageNumber: number): void => {
       const { serverURL, path, pageSize } = config.value;
       const controller = new AbortController();
 
@@ -282,7 +290,7 @@ export default defineComponent({
 
       abort?.();
 
-      fetchCommentList({
+      getComment({
         serverURL,
         lang: config.value.lang,
         path,
@@ -309,12 +317,12 @@ export default defineComponent({
       abort = controller.abort.bind(controller);
     };
 
-    const loadMore = (): void => fetchComment(page.value + 1);
+    const loadMore = (): void => getCommentData(page.value + 1);
 
     const refresh = (): void => {
       count.value = 0;
       data.value = [];
-      fetchComment(1);
+      getCommentData(1);
     };
 
     const onSortByChange = (item: SortKeyItems): void => {

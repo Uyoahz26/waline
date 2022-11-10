@@ -21,7 +21,8 @@ Waline 的服务端地址。
 
 请保证每个 _文章页_ 路径的唯一性，否则可能会出现不同 _文章页_ 下加载相同评论列表的情况。
 
-例子: 如果你站点的 `/example/path/` 和 `/example/path` 对应同一个页面，你最好将其设置为 `window.location.pathname.replace(/\/$/,'')`。
+- 例子 1: 如果你站点的 `/example/path/` 和 `/example/path` 对应同一个页面，你可以将其设置为 `window.location.pathname.replace(/\/$/,'')`。
+- 例子 2: 如果你想在站点的根目录下存放中文文档，但在 `/en/` `/ja/` 等文件夹存放其他语言文档，你可以将其设置为 `window.location.pathname.replace(/^\/(en|fr|jp)\//, '/')`。
 
 :::
 
@@ -350,47 +351,52 @@ Waline 的服务端地址。
 - 详情:
 
   ```ts
-  interface WalineSearchResult extends Record<string, unknown> {
+  interface WalineSearchImageData extends Record<string, unknown> {
     /**
-     * Image link
+     * 图片链接
      */
     src: string;
 
     /**
-     * Image title, optional
+     * 图片标题
+     *
+     * @description 用于图片的 alt 属性
      */
     title?: string;
 
     /**
-     * Image preview link, optional
+     * 图片缩略图
+     *
+     * @description 为了更好的加载性能，我们会优先在列表中使用此缩略图
      *
      * @default src
      */
     preview?: string;
   }
 
+  type WalineSearchResult = WalineSearchImageData[];
+
   interface WalineSearchOptions {
     /**
-     * 搜索行为
+     * 搜索操作
      */
-    search: (word: string) => Promise<WalineSearchResult[]>;
+    search: (word: string) => Promise<WalineSearchResult>;
 
     /**
-     * 默认的搜索行为
+     * 打开列表时展示的默认结果
      *
      * @default () => search('')
      */
-    default?: () => Promise<WalineSearchResult[]>;
+    default?: () => Promise<WalineSearchResult>;
 
     /**
-     * 获取更多行为
+     * 获取更多的操作
+     *
+     * @description 会在列表滚动到底部时触发，如果你的搜索服务支持分页功能，你应该设置此项实现无限滚动
      *
      * @default (word) => search(word)
      */
-    more?: (
-      word: string,
-      currectCount: number
-    ) => Promise<WalineSearchResult[]>;
+    more?: (word: string, currectCount: number) => Promise<WalineSearchResult>;
   }
   ```
 
@@ -408,3 +414,17 @@ Waline 的服务端地址。
 我们希望你保持打开以支持 Waline。
 
 :::
+
+## recaptchaV3Key
+
+- 类型: `string`
+- 必填: 否
+
+reCAPTCHA V3 是 Google 提供的验证码服务，配置 reCAPTCHA V3 网站密钥即可开启该功能。服务端需要同步配置 `RECAPTCHA_V3_SECRET` 环境变量。
+
+## reaction
+
+- 类型: `boolean | string[]`
+- 默认值: `false`
+
+为文章增加表情互动功能，设置为 `true` 提供默认表情，也可以通过设置表情地址数组来自定义表情图片，最大支持 8 个表情。

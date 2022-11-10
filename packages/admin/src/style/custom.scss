@@ -71,3 +71,13 @@ div[tabindex='-1'] {
 .social-accounts a + a {
   margin-left: 16px;
 }
+
+.upgrade-tips {
+  padding: 0 10px;
+  border-bottom: 1px solid rgb(212 167 44 / 40%);
+
+  background: #fff8c5;
+  color: #24292f;
+
+  line-height: 36px;
+}

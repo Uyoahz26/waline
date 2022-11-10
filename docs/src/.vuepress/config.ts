@@ -1,19 +1,10 @@
 import { docsearchPlugin } from '@vuepress/plugin-docsearch';
 import { path } from '@vuepress/utils';
 import { defineUserConfig } from 'vuepress';
+import { redirectPlugin } from 'vuepress-plugin-redirect';
 import theme from './theme';
 
 export default defineUserConfig({
-  head: [
-    [
-      'link',
-      {
-        rel: 'stylesheet',
-        href: '//at.alicdn.com/t/font_3180165_rlbqujdkar.css',
-      },
-    ],
-  ],
-
   locales: {
     '/': {
       lang: 'zh-CN',
@@ -96,15 +87,8 @@ export default defineUserConfig({
         },
       },
     }),
+    redirectPlugin(),
   ],
-
-  extendsBundlerOptions: (config, app) => {
-    config.viteOptions.ssr = config.viteOptions.ssr ?? {};
-
-    config.viteOptions.ssr.noExternal = config.viteOptions.ssr.noExternal ?? [];
-
-    config.viteOptions.ssr.noExternal.push('vuepress-shared');
-  },
 
   shouldPrefetch: false,
 });

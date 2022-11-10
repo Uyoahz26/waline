@@ -1,6 +1,6 @@
 {
   "name": "waline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "admin:analyze": "npm --dir=packages/admin analyze",
@@ -16,6 +16,7 @@
     "docs:dev": "pnpm --dir=docs run dev",
     "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm lint:stylelint",
     "lint:eslint": "eslint --ext .js,.vue,.ts --fix .",
+    "lint:md": "markdownlint docs/ --fix",
     "lint:prettier": "prettier --check --write .",
     "lint:stylelint": "stylelint packages/*/src/**/*.scss --fix",
     "prepare": "husky install",
@@ -23,7 +24,15 @@
     "test": "vitest"
   },
   "lint-staged": {
-    "*.{md,json,yml,js,vue}": [
+    "*.md": [
+      "markdownlint --fix",
+      "prettier --write"
+    ],
+    "*.{js,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,yml}": [
       "prettier --write"
     ],
     "package.json": [
@@ -39,42 +48,43 @@
     "singleQuote": true
   },
   "devDependencies": {
-    "@babel/core": "7.19.0",
-    "@babel/eslint-parser": "7.18.9",
+    "@babel/core": "7.19.6",
+    "@babel/eslint-parser": "7.19.1",
     "@commitlint/cli": "17.1.2",
     "@commitlint/config-conventional": "17.1.0",
-    "@typescript-eslint/eslint-plugin": "5.36.2",
-    "@typescript-eslint/parser": "5.36.2",
+    "@typescript-eslint/eslint-plugin": "5.40.1",
+    "@typescript-eslint/parser": "5.40.1",
     "@vue/eslint-config-prettier": "7.0.0",
-    "@vue/eslint-config-typescript": "11.0.1",
-    "apidoc": "0.53.0",
+    "@vue/eslint-config-typescript": "11.0.2",
+    "apidoc": "0.53.1",
     "c8": "7.12.0",
     "commitizen": "4.2.5",
     "conventional-changelog-cli": "2.2.2",
     "cross-env": "7.0.3",
     "cz-conventional-changelog": "3.3.0",
-    "eslint": "8.23.0",
+    "eslint": "8.26.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-plugin-prettier": "4.2.1",
-    "eslint-plugin-react": "7.31.8",
-    "eslint-plugin-vue": "9.4.0",
+    "eslint-plugin-react": "7.31.10",
+    "eslint-plugin-vue": "9.6.0",
     "husky": "8.0.1",
     "lint-staged": "13.0.3",
-    "postcss": "8.4.16",
+    "markdownlint-cli": "0.32.2",
+    "postcss": "8.4.18",
     "prettier": "2.7.1",
-    "sass": "1.54.9",
-    "sort-package-json": "1.57.0",
-    "stylelint": "14.11.0",
+    "sass": "1.55.0",
+    "sort-package-json": "2.0.0",
+    "stylelint": "14.14.0",
     "stylelint-config-prettier": "9.0.3",
-    "stylelint-config-standard": "28.0.0",
-    "stylelint-config-standard-scss": "5.0.0",
+    "stylelint-config-standard": "29.0.0",
+    "stylelint-config-standard-scss": "6.0.0",
     "stylelint-order": "5.0.0",
-    "typescript": "4.8.3",
-    "vercel": "28.2.4",
-    "vite": "3.1.0",
-    "vitest": "0.23.2"
+    "typescript": "4.8.4",
+    "vercel": "28.4.12",
+    "vite": "3.1.8",
+    "vitest": "0.24.3"
   },
-  "packageManager": "pnpm@7.11.0",
+  "packageManager": "pnpm@7.14.0",
   "apidoc": {
     "title": "Waline API Documentation"
   },

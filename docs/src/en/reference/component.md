@@ -21,7 +21,8 @@ Article path id. Used to distinguish different _article pages_ to ensure loading
 
 Please ensure the uniqueness of each _article page_ path, otherwise the same comment list may be loaded .
 
-For example: If on your site `/example/path/` and `/example/path` is the same page, you should probably set `window.location.pathname.replace(/\/$/,'')`.
+- e.g. 1: If on your site `/example/path/` and `/example/path` is the same page, you should probably set `window.location.pathname.replace(/\/$/,'')`.
+- e.g. 2: If you store en docs at root, while serve other language docs at `/zh/`, `/ja/`, etc, you should probaly set `window.location.pathname.replace(/^\/(fr|jp|zh)\//, '/')`.
 
 :::
 
@@ -103,7 +104,7 @@ Set required fields, default anonymous, optional values:
 Login mode status, optional values:
 
 - `'enable'`: enable login (default)
-- `'disable'`: Login is disabled, users should fill in infomation to comment
+- `'disable'`: Login is disabled, users should fill in information to comment
 - `'force'`: Forced login, users must login to comment
 
 ## wordLimit
@@ -346,52 +347,57 @@ You can import $\TeX$ renderer to provide preview feature. We recommend you to u
 
 ## search
 
-- 类型: `WalineSearchOptions | false`
-- 必填: 否
-- 详情:
+- Type: `WalineSearchOptions | false`
+- Required: No
+- Details:
 
   ```ts
-  interface WalineSearchResult extends Record<string, unknown> {
+  interface WalineSearchImageData extends Record<string, unknown> {
     /**
      * Image link
      */
     src: string;
 
     /**
-     * Image title, optional
+     * Image title
+     *
+     * @description Used for alt attribute of image
      */
     title?: string;
 
     /**
-     * Image preview link, optional
+     * Image preview link
+     *
+     * @description For better loading performance, we will use this thumbnail first in the list
      *
      * @default src
      */
     preview?: string;
   }
 
+  type WalineSearchResult = WalineSearchImageData[];
+
   interface WalineSearchOptions {
     /**
      * Search action
      */
-    search: (word: string) => Promise<WalineSearchResult[]>;
+    search: (word: string) => Promise<WalineSearchResult>;
 
     /**
-     * Default search action
+     * Default result when opening list
      *
      * @default () => search('')
      */
-    default?: () => Promise<WalineSearchResult[]>;
+    default?: () => Promise<WalineSearchResult>;
 
     /**
      * Fetch more action
      *
+     * @description It will be triggered when the list scrolls to the bottom. If your search service supports paging, you should set this to achieve infinite scrolling
+     *
      * @default (word) => search(word)
      */
-    more?: (
-      word: string,
-      currectCount: number
-    ) => Promise<WalineSearchResult[]>;
+    more?: (word: string, currectCount: number) => Promise<WalineSearchResult>;
   }
   ```
 
@@ -409,3 +415,17 @@ Whether show copyright and version in footer.
 We hope you can keep it on to support Waline.
 
 :::
+
+## recaptchaV3Key
+
+- Type: `string`
+- Required: No
+
+reCAPTCHA V3 is a captcha service provided by Google. You can add reCAPTCHA V3 site key with `recaptchaV3Key` to enable it. Notice you should also set environment variable `RECAPTCHA_V3_SECRET` for server.
+
+## reaction
+
+- Type: `boolean | string[]`
+- Default: `false`
+
+Add emoji interaction function to the article, set it to `true` to provide the default emoji, you can also customize the emoji image by setting the emoji url array, and supports a maximum of 8 emojis.

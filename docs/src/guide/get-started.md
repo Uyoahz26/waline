@@ -138,3 +138,19 @@ icon: creative
 1. 部署完成后，请访问 `<serverURL>/ui/register` 进行注册。首个注册的人会被设定成管理员。
 1. 管理员登陆后，即可看到评论管理界面。在这里可以修改、标记或删除评论。
 1. 用户也可通过评论框注册账号，登陆后会跳转到自己的档案页。
+
+## 视频教程
+
+以下是热心用户制作的视频教程，以上操作不清楚的也可以参考一二。
+
+### Waline 部署教程（快速上手）
+
+> UP 主：[rickroll 摇](https://space.bilibili.com/381992209)
+
+<BiliBili bvid="BV1pB4y1E7fp" />
+
+### 使用 Vercel 简单地部署 Waline 评论系统
+
+> UP 主：[岚天呀](https://space.bilibili.com/355877984)
+
+<BiliBili bvid="BV1Ft4y1A73f" />

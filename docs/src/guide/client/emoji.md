@@ -23,6 +23,12 @@ Waline 提供了一系列开箱即用的表情预设。你可以直接将它们�
   https://unpkg.com/@waline/emojis@1.1.0/bilibili
   ```
 
+- 哔哩哔哩小黄脸
+
+  ```http
+  https://unpkg.com/@waline/emojis@1.1.0/bmoji
+  ```
+
 - QQ
 
   ```http
@@ -211,9 +217,15 @@ https://example.com/myemoji/
 
 我们更推荐你将图片上传到一个 GitHub 仓库，并为每次修改添加一个 tag。这样你可以使用 [cdn.jsdelivr.net](https://www.jsdelivr.com/) 上带有版本的 CDN 链接作为你的预设，其格式为 `https://cdn.jsdelivr.net/gh/user/repo@version/file`。绑定标签后，历史评论引用的图片链接将不会因为调整图片而失效。
 
+::: warning
+
+由于 cdn.jsdelivr.net 在国内受到污染，你可以将 `cdn.jsdelivr.net` 换成 `gcore.jsdelivr.net`
+
+:::
+
 ::: tip
 
-官方预设就使用了 [walinejs/emoji](https://github.com/walinejs/emoji) 的 `v1.0.0` 版本。
+官方预设就使用了 [walinejs/emojis](https://github.com/walinejs/emojis) 的 `v1.1.0` 版本。
 
 :::
 

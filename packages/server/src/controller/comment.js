@@ -58,6 +58,11 @@ async function formatCmt(
   comment.comment = markdownParser(comment.comment);
   comment.like = Number(comment.like) || 0;
 
+  // compat sql storage return number flag to string
+  if (typeof comment.sticky === 'string') {
+    comment.sticky = Boolean(Number(comment.sticky));
+  }
+
   return comment;
 }
 
@@ -533,8 +538,8 @@ module.exports = class extends BaseRest {
       think.logger.debug(`Comment post frequence check OK!`);
 
       /** Akismet */
-      const { COMMENT_AUDIT, AUTHOR_EMAIL, BLOGGER_EMAIL } = process.env;
-      const AUTHOR = AUTHOR_EMAIL || BLOGGER_EMAIL;
+      const { COMMENT_AUDIT, AUTHOR_EMAIL } = process.env;
+      const AUTHOR = AUTHOR_EMAIL;
       const isAuthorComment = AUTHOR
         ? data.mail.toLowerCase() === AUTHOR.toLowerCase()
         : false;
@@ -623,7 +628,7 @@ module.exports = class extends BaseRest {
       : undefined;
 
     if (comment.status !== 'spam') {
-      const notify = this.service('notify');
+      const notify = this.service('notify', this);
 
       await notify.run(
         { ...cmtReturn, mail: resp.mail, rawComment: comment },
@@ -715,7 +720,7 @@ module.exports = class extends BaseRest {
         pUser = pUser[0];
       }
 
-      const notify = this.service('notify');
+      const notify = this.service('notify', this);
       const pcmtReturn = await formatCmt(
         pComment,
         pUser ? [pUser] : [],
