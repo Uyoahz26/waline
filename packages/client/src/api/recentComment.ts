@@ -1,4 +1,3 @@
-import { errorCheck } from './utils';
 import type { BaseAPIOptions } from './utils';
 import type { WalineComment } from '../typings';
 
@@ -6,7 +5,7 @@ export interface GetRecentCommentOptions extends BaseAPIOptions {
   /**
    * 获取评论的数量
    *
-   * Comment numebr to be fetched
+   * Comment number to be fetched
    */
   count: number;
 
@@ -39,7 +38,5 @@ export const getRecentComment = ({
   return fetch(`${serverURL}/comment?type=recent&count=${count}&lang=${lang}`, {
     signal,
     headers,
-  })
-    .then((resp) => <Promise<WalineComment[]>>resp.json())
-    .then((data) => errorCheck(data, 'recent comment'));
+  }).then((resp) => <Promise<WalineComment[]>>resp.json());
 };

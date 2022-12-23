@@ -13,7 +13,7 @@ export interface WalineCommentCountOptions {
   /**
    * 评论数 CSS 选择器
    *
-   * Commment count CSS selector
+   * Comment count CSS selector
    *
    * @default '.waline-comment-count'
    */
@@ -43,8 +43,7 @@ export const commentCount = ({
   path = window.location.pathname,
   selector = '.waline-comment-count',
   lang = 'zh-CN',
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-WalineCommentCountOptions): WalineAbort => {
+}: WalineCommentCountOptions): WalineAbort => {
   const controller = new AbortController();
 
   // comment count

@@ -1,4 +1,5 @@
 import {
+  defaultEmoji,
   defaultLang,
   defaultLocales,
   defaultReaction,
@@ -24,10 +25,26 @@ export interface WalineEmojiConfig {
 }
 
 export interface WalineConfig
-  extends Required<Omit<WalineProps, 'wordLimit' | 'reaction'>> {
+  extends Required<
+    Omit<
+      WalineProps,
+      | 'emoji'
+      | 'imageUploader'
+      | 'highlighter'
+      | 'texRenderer'
+      | 'wordLimit'
+      | 'reaction'
+      | 'search'
+    >
+  > {
   locale: WalineLocale;
   wordLimit: [number, number] | false;
   reaction: string[];
+  emoji: Exclude<WalineProps['emoji'], boolean | undefined>;
+  highlighter: Exclude<WalineProps['highlighter'], true | undefined>;
+  imageUploader: Exclude<WalineProps['imageUploader'], true | undefined>;
+  texRenderer: Exclude<WalineProps['texRenderer'], true | undefined>;
+  search: Exclude<WalineProps['search'], true | undefined>;
 }
 
 export const getServerURL = (serverURL: string): string => {
@@ -42,7 +59,7 @@ const getWordLimit = (
   Array.isArray(wordLimit) ? wordLimit : wordLimit ? [0, wordLimit] : false;
 
 const fallback = <T = unknown>(
-  value: T | false | undefined,
+  value: T | boolean | undefined,
   fallback: T
 ): T | false =>
   typeof value === 'function' ? value : value === false ? false : fallback;
@@ -53,7 +70,7 @@ export const getConfig = ({
   path = location.pathname,
   lang = defaultLang,
   locale,
-  emoji = ['//unpkg.com/@waline/emojis@1.1.0/weibo'],
+  emoji = defaultEmoji,
   meta = ['nick', 'mail', 'link'],
   requiredMeta = [],
   dark = false,
@@ -67,6 +84,7 @@ export const getConfig = ({
   search,
   reaction,
   recaptchaV3Key = '',
+  commentSorting = 'latest',
   ...more
 }: WalineProps): WalineConfig => ({
   serverURL: getServerURL(serverURL),
@@ -83,16 +101,22 @@ export const getConfig = ({
   texRenderer: fallback(texRenderer, defaultTexRenderer),
   lang,
   dark,
-  emoji,
+  emoji: typeof emoji === 'boolean' ? (emoji ? defaultEmoji : []) : emoji,
   pageSize,
   login,
   copyright,
-  search: search || getDefaultSearchOptions(lang),
+  search:
+    search === false
+      ? false
+      : typeof search === 'object'
+      ? search
+      : getDefaultSearchOptions(lang),
   recaptchaV3Key,
   reaction: Array.isArray(reaction)
     ? reaction
     : reaction === true
     ? defaultReaction
     : [],
+  commentSorting,
   ...more,
 });

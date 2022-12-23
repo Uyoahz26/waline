@@ -1,7 +1,10 @@
 import type {
+  WalineCommentSorting,
   WalineHighlighter,
   WalineEmojiInfo,
+  WalineEmojiPresets,
   WalineImageUploader,
+  WalineLoginStatus,
   WalineMeta,
   WalineTexRenderer,
   WalineSearchOptions,
@@ -130,6 +133,15 @@ export interface WalineProps {
   locale?: Partial<WalineLocale>;
 
   /**
+   * 评论列表排序方式
+   *
+   * Sorting method for comment list
+   *
+   * @default 'latest'
+   */
+  commentSorting?: WalineCommentSorting;
+
+  /**
    * 是否启用暗黑模式适配
    *
    * @more 设置 `'auto'` 会根据设备暗黑模式自适应。填入 CSS 选择器会在对应选择器生效时启用夜间模式。
@@ -147,22 +159,26 @@ export interface WalineProps {
    *
    * @default ['//unpkg.com/@waline/emojis@1.1.0/weibo']
    */
-  emoji?: (string | WalineEmojiInfo)[] | false;
+  emoji?: (WalineEmojiInfo | WalineEmojiPresets)[] | boolean;
 
   /**
    * 设置搜索功能
    *
    * Customize Search feature
+   *
+   * @default true
    */
-  search?: WalineSearchOptions | false;
+  search?: WalineSearchOptions | boolean;
 
   /**
    * 代码高亮
    *
    * Code highlighting
+   *
+   * @default true
    */
 
-  highlighter?: WalineHighlighter | false;
+  highlighter?: WalineHighlighter | boolean;
 
   /**
    * 自定义图片上传方法，方便更好的存储图片
@@ -172,16 +188,20 @@ export interface WalineProps {
    * Custom image upload callback to manage picture by yourself.
    *
    * We will pass a picture file object when execute it.
+   *
+   * @default true
    */
 
-  imageUploader?: WalineImageUploader | false;
+  imageUploader?: WalineImageUploader | boolean;
 
   /**
    * 自定义数学公式处理方法，用于预览。
    *
    * Custom math formula parse callback for preview.
+   *
+   * @default true
    */
-  texRenderer?: WalineTexRenderer | false;
+  texRenderer?: WalineTexRenderer | boolean;
 
   /**
    *
@@ -194,12 +214,12 @@ export interface WalineProps {
    * Login mode status, optional values:
    *
    * - `'enable'`: enable login (default)
-   * - `'disable'`: Login is disabled, users should fill in infomation to comment
+   * - `'disable'`: Login is disabled, users should fill in information to comment
    * - `'force'`: Forced login, users must login to comment
    *
    * @default 'enable'
    */
-  login?: 'enable' | 'disable' | 'force';
+  login?: WalineLoginStatus;
 
   /**
    * 是否在页脚展示版权信息
